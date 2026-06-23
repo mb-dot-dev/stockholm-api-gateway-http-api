@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Application stack'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: The name of the project to which this application belongs.
+
+Resources:
+  # 1. Create the AppRegistry Application which registers with myApplications
+  MyRegistryApplication:
+    Type: AWS::ServiceCatalogAppRegistry::Application
+    Properties:
+      Name: !Ref ProjectName
+      Description: "Application container managed via CloudFormation and visible in myApplications dashboard."
+      Tags:
+        Project: !Ref ProjectName
