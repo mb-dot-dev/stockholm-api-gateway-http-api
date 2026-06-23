@@ -3,13 +3,17 @@ run-name: Build & deploy 🚀
 on: [push]
 
 jobs:
-  deploy-aws-app:
-    name: Deploy AWS Application
-    uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
+  deploy:
+    runs-on: ubuntu-latest
     permissions:
-      id-token: write # REQUIRED for OIDC
+      id-token: write
       contents: read
-    with:
-      stack-name: stockholm-application
-      template: aws/application.yml
-      project: stockholm
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
+          aws-region: eu-central-1
+
