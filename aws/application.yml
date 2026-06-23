@@ -6,6 +6,14 @@ Parameters:
     Type: String
     Description: The name of the project to which this application belongs.
 
+Outputs:
+  ApplicationTagKey:
+    Description: The key of the tag used to identify the application in AWS Service Catalog AppRegistry.
+    Value: !GetAtt MyRegistryApplication.ApplicationTagKey
+  ApplicationTagValue:
+    Description: The value of the tag used to identify the application in AWS Service Catalog AppRegistry.
+    Value: !GetAtt MyRegistryApplication.ApplicationTagValue
+
 Resources:
   # 1. Create the AppRegistry Application which registers with myApplications
   MyRegistryApplication:
