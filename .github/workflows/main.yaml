@@ -6,6 +6,9 @@ jobs:
   deploy-aws-app:
     name: Deploy AWS Application
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
+    permissions:
+      id-token: write # REQUIRED for OIDC
+      contents: read
     with:
       stack-name: stockholm-application
       template: aws/application.yml
