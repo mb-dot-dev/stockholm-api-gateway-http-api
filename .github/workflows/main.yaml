@@ -14,3 +14,5 @@ jobs:
       stack-name: stockholm-application
       template: aws/application.yml
       project: stockholm
+      parameter-overrides: >-
+        ProjectName=stockholm
