@@ -41,7 +41,7 @@ jobs:
       template: aws/sqs.yml
       parameter-overrides: >-
         QueueName=${{ needs.prepare.outputs.project_name }}-queue,
-        AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs).ApplicationTagKey }},
-        AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs).ApplicationTagValue }}
+        AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs).ApplicationTagKey }},
+        AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs).ApplicationTagValue }}
       project: ${{ needs.prepare.outputs.project_name }}
     secrets: inherit
