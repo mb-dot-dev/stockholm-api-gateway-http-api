@@ -15,6 +15,9 @@ Parameters:
   QueueUrl:
     Type: String
     Description: URL of the existing SQS queue
+  AllowedIps:
+    Type: String
+    Description: Comma-separated list of allowed IP addresses for the producer Lambda function
 
 Outputs:
   FunctionArn:
@@ -41,6 +44,7 @@ Resources:
           POWERTOOLS_SERVICE_NAME: !Ref FunctionName
           POWERTOOLS_LOG_LEVEL: INFO
           QUEUE_URL: !Ref QueueUrl
+          ALLOWED_IPS: 
       Tags:
         awsApplication: !Ref AppTagValue
 
