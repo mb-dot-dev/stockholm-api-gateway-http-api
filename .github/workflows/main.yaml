@@ -45,3 +45,21 @@ jobs:
         AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }}
       project: ${{ needs.prepare.outputs.project_name }}
     secrets: inherit
+
+  deploy-consumer-iam-role:
+    name: Deploy Consumer IAM Role
+    needs: 
+      - prepare
+      - deploy-aws-app
+      - deploy-sqs
+    uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
+    with:
+      stack-name: ${{ needs.prepare.outputs.project_name }}-consumer-iam-role
+      template: aws/consumer-iam-role.yml
+      parameter-overrides: >-
+        AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagKey }},
+        AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }},
+        QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }},
+        RoleName=${{ needs.prepare.outputs.project_name }}-consumer-lambda
+      project: ${{ needs.prepare.outputs.project_name }}
+    secrets: inherit

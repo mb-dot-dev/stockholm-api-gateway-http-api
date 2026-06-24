@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: IAM role for the consumer Lambda function
+
+Parameters:
+  AppTagKey:
+    Type: String
+    Description: Tag key for the application
+  AppTagValue:
+    Type: String
+    Description: Tag value for the application
+  QueueArn:
+    Type: String
+    Description: ARN of the SQS queue
+  RoleName:
+    Type: String
+    Description: Name of the IAM role for the consumer Lambda function
+
+Outputs:
+  ConsumerExecutionRoleArn:
+    Description: ARN of the consumer Lambda execution role
+    Value: !GetAtt ConsumerExecutionRole.Arn
+
+Resources:
+  ConsumerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref RoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: auth0-validation-consumer-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !Ref QueueArn
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Tags:
+        - Key: !Ref AppTagKey
+          Value: !Ref AppTagValue
