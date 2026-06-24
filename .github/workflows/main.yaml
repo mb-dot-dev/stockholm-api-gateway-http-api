@@ -20,8 +20,8 @@ jobs:
       - id: vars
         run: |
           echo "project_name=${{ env.PROJECT_NAME }}" >> "$GITHUB_OUTPUT"
-          echo "JWT_ISSUER=${{ secrets.JWT_ISSUER }}" >> "$GITHUB_OUTPUT"
-          echo "JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}" >> "$GITHUB_OUTPUT"
+          echo "JWT_ISSUER=${{ vars.JWT_ISSUER }}" >> "$GITHUB_OUTPUT"
+          echo "JWT_AUDIENCE=${{ vars.JWT_AUDIENCE }}" >> "$GITHUB_OUTPUT"
 
   build-lambda-zip:
     runs-on: ubuntu-latest
