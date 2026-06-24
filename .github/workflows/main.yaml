@@ -136,3 +136,21 @@ jobs:
             FunctionName=${{ needs.prepare.outputs.project_name }}-consumer-lambda \
             ConsumerExecutionRoleArn=${{ fromJSON(needs.deploy-consumer-iam-role.outputs.stack-outputs-json).ConsumerExecutionRoleArn }} \
             QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }}
+
+  deploy-producer-iam-role:
+    name: Deploy Producer IAM Role
+    needs: 
+      - prepare
+      - deploy-aws-app
+      - deploy-sqs
+    uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
+    with:
+      stack-name: ${{ needs.prepare.outputs.project_name }}-producer-iam-role
+      template: aws/producer-iam-role.yml
+      parameter-overrides: >-
+        AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagKey }},
+        AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }},
+        QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }},
+        RoleName=${{ needs.prepare.outputs.project_name }}-producer-lambda
+      project: ${{ needs.prepare.outputs.project_name }}
+    secrets: inherit

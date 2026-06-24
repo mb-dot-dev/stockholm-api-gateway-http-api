@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: IAM role for the consumer Lambda function
+Description: IAM roles for the producer Lambda functions
 
 Parameters:
   AppTagKey:
@@ -13,15 +13,15 @@ Parameters:
     Description: ARN of the SQS queue
   RoleName:
     Type: String
-    Description: Name of the IAM role for the consumer Lambda function
+    Description: Name of the IAM role for the producer Lambda function
 
 Outputs:
-  ConsumerExecutionRoleArn:
-    Description: ARN of the consumer Lambda execution role
-    Value: !GetAtt ConsumerExecutionRole.Arn
+  ProducerExecutionRoleArn:
+    Description: ARN of the producer Lambda execution role
+    Value: !GetAtt ProducerExecutionRole.Arn
 
 Resources:
-  ConsumerExecutionRole:
+  ProducerExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Ref RoleName
@@ -38,13 +38,7 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action:
-                  - sqs:ReceiveMessage
-                  - sqs:DeleteMessage
-                  - sqs:GetQueueAttributes
+                Action: sqs:SendMessage
                 Resource: !Ref QueueArn
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-      Tags:
-        - Key: !Ref AppTagKey
-          Value: !Ref AppTagValue
