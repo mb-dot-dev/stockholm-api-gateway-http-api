@@ -128,7 +128,6 @@ jobs:
       - name: Deploy to AWS Lambda
         run: |
           sam deploy \
-            --config-file consumer-samconfig.toml \
             --stack-name ${{ needs.prepare.outputs.project_name }}-consumer-lambda \
             --template-file consumer-template.yaml \
             --parameter-overrides \
