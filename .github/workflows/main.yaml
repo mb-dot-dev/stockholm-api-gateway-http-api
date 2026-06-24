@@ -14,9 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       project_name: ${{ steps.vars.outputs.project_name }}
+      jwt_issuer: ${{ steps.vars.outputs.JWT_ISSUER }}
+      jwt_audience: ${{ steps.vars.outputs.JWT_AUDIENCE }}
     steps:
       - id: vars
-        run: echo "project_name=${{ env.PROJECT_NAME }}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "project_name=${{ env.PROJECT_NAME }}" >> "$GITHUB_OUTPUT"
+          echo "JWT_ISSUER=${{ secrets.JWT_ISSUER }}" >> "$GITHUB_OUTPUT"
+          echo "JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}" >> "$GITHUB_OUTPUT"
 
   build-lambda-zip:
     runs-on: ubuntu-latest
@@ -161,6 +166,9 @@ jobs:
       - deploy-aws-app
       - deploy-sqs
       - deploy-producer-iam-role
+    outputs:
+      function_arn: ${{ steps.output.outputs.FunctionArn }}
+      function_name: ${{ steps.output.outputs.FunctionName }}
     steps:
       - uses: actions/checkout@v7
 
@@ -191,6 +199,12 @@ jobs:
             FunctionName=${{ needs.prepare.outputs.project_name }}-producer \
             LambdaExecutionRoleArn=${{ fromJSON(needs.deploy-producer-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }} \
             QueueUrl=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueUrl }}
+      
+      - name: Output Lambda function details
+        id: output
+        run: |
+          echo "FunctionArn=$(aws cloudformation describe-stacks --stack-name ${{ needs.prepare.outputs.project_name }}-producer-lambda --query 'Stacks[0].Outputs[?OutputKey==`FunctionArn`].OutputValue' --output text)" >> "$GITHUB_OUTPUT"
+          echo "FunctionName=$(aws cloudformation describe-stacks --stack-name ${{ needs.prepare.outputs.project_name }}-producer-lambda --query 'Stacks[0].Outputs[?OutputKey==`FunctionName`].OutputValue' --output text)" >> "$GITHUB_OUTPUT"
 
   deploy-api-gateway:
     name: Deploy API Gateway
@@ -204,10 +218,10 @@ jobs:
       template: aws/api-gateway.yml
       parameter-overrides: >-
         ProjectName=${{ needs.prepare.outputs.project_name }},
-        ProducerFunctionArn=${{ fromJSON(needs.deploy-producer-lambda.outputs.stack-outputs-json).FunctionArn }},
-        ProducerFunctionName=${{ fromJSON(needs.deploy-producer-lambda.outputs.stack-outputs-json).FunctionName }},
-        JwtIssuer=${{ secrets.JWT_ISSUER }},
-        JwtAudience=${{ secrets.JWT_AUDIENCE }}
+        ProducerFunctionArn=${{ needs.deploy-producer-lambda.outputs.function_arn }},
+        ProducerFunctionName=${{ needs.deploy-producer-lambda.outputs.function_name }},
+        JwtIssuer=${{ needs.prepare.outputs.jwt_issuer }},
+        JwtAudience=${{ needs.prepare.outputs.jwt_audience }}
       project: ${{ needs.prepare.outputs.project_name }}
     secrets: inherit
           
