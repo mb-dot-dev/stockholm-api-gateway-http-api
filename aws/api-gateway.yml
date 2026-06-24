@@ -1,0 +1,93 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template for API Gateway HTTP API v2 with JWT authorizer and Lambda proxy integration
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Name of the project (used for naming resources)
+
+  ProducerFunctionArn:
+    Type: String
+    Description: ARN of the producer Lambda function the API integrates with
+
+  ProducerFunctionName:
+    Type: String
+    Description: Name of the producer Lambda function the API integrates with
+
+  JwtIssuer:
+    Type: String
+    Description: JWT issuer URL (e.g. https://your-tenant.auth0.com/)
+
+  JwtAudience:
+    Type: String
+    Description: JWT audience identifier (API identifier in Auth0)
+
+Resources:
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub "${ProjectName}-api"
+      ProtocolType: HTTP
+
+  JwtAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref HttpApi
+      AuthorizerType: JWT
+      Name: !Sub "${ProjectName}-jwt-authorizer"
+      IdentitySource:
+        - $request.header.Authorization
+      JwtConfiguration:
+        Issuer: !Ref JwtIssuer
+        Audience:
+          - !Ref JwtAudience
+
+  ProducerIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Ref ProducerFunctionArn
+      PayloadFormatVersion: "2.0"
+
+  PostRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: POST /
+      AuthorizationType: JWT
+      AuthorizerId: !Ref JwtAuthorizer
+      Target: !Sub "integrations/${ProducerIntegration}"
+
+  ProducerInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ProducerFunctionName
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*/*"
+
+  ApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/apigateway/${ProjectName}-api"
+
+  DefaultStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      StageName: $default
+      AutoDeploy: true
+      AccessLogSettings:
+        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+        Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","routeKey":"$context.routeKey","status":"$context.status","protocol":"$context.protocol","responseLength":"$context.responseLength","integrationStatus":"$context.integrationStatus","authorizerError":"$context.authorizer.error"}'
+
+Outputs:
+  ApiEndpoint:
+    Description: HTTP API endpoint URL
+    Value: !GetAtt HttpApi.ApiEndpoint
+
+  ApiId:
+    Description: HTTP API ID
+    Value: !Ref HttpApi

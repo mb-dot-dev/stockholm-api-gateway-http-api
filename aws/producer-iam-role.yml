@@ -2,12 +2,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: IAM roles for the producer Lambda functions
 
 Parameters:
-  AppTagKey:
-    Type: String
-    Description: Tag key for the application
-  AppTagValue:
-    Type: String
-    Description: Tag value for the application
   QueueArn:
     Type: String
     Description: ARN of the SQS queue
