@@ -5,6 +5,10 @@ on: [push]
 env:
   PROJECT_NAME: stockholm
 
+permissions:
+  id-token: write # REQUIRED for OIDC
+  contents: read
+    
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -18,9 +22,6 @@ jobs:
     name: Deploy AWS Application
     needs: prepare
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
-    permissions:
-      id-token: write # REQUIRED for OIDC
-      contents: read
     secrets: inherit
     with:
       stack-name: ${{ needs.prepare.outputs.project_name }}-application
