@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: Serverless application with consumer (SQS subscriber) Lambda function
+Description: Serverless application with producer Lambda function
 
 Parameters:
   AppTagValue:
@@ -8,22 +8,22 @@ Parameters:
     Description: Tag value for the application
   FunctionName:
     Type: String
-    Description: Name of the consumer Lambda function
+    Description: Name of the producer Lambda function
   LambdaExecutionRoleArn:
     Type: String
-    Description: ARN of the existing IAM role for the consumer Lambda execution
+    Description: ARN of the existing IAM role for the producer Lambda execution
   QueueArn:
     Type: String
     Description: ARN of the existing SQS queue
 
 Outputs:
   FunctionArn:
-    Description: ARN of the consumer Lambda function
+    Description: ARN of the producer Lambda function
     Value: !GetAtt Function.Arn
 
   FunctionName:
-    Description: Name of the consumer Lambda function
-    Value: !Ref Function
+    Description: Name of the producer Lambda function
+    Value: !Ref FunctionName
 
 Resources:
   Function:
@@ -31,20 +31,11 @@ Resources:
     Properties:
       FunctionName: !Ref FunctionName
       Runtime: python3.14
-      Handler: app.consumer.lambda_handler
+      Handler: app.producer.lambda_handler
       CodeUri: lambda.zip
       Role: !Ref LambdaExecutionRoleArn
-      Timeout: 300
+      Timeout: 10
       MemorySize: 128
-      Events:
-        SQSEvent:
-          Type: SQS
-          Properties:
-            Queue: !Ref QueueArn
-            BatchSize: 1
-            Enabled: true
-            FunctionResponseTypes:
-              - ReportBatchItemFailures
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: !Ref FunctionName

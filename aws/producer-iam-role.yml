@@ -16,12 +16,12 @@ Parameters:
     Description: Name of the IAM role for the producer Lambda function
 
 Outputs:
-  ProducerExecutionRoleArn:
+  LambdaExecutionRoleArn:
     Description: ARN of the producer Lambda execution role
-    Value: !GetAtt ProducerExecutionRole.Arn
+    Value: !GetAtt LambdaExecutionRole.Arn
 
 Resources:
-  ProducerExecutionRole:
+  LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Ref RoleName
