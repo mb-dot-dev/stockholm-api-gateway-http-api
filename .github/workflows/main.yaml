@@ -2,17 +2,40 @@ name: Main
 run-name: Build & deploy 🚀
 on: [push]
 
+env:
+  PROJECT_NAME: stockholm
+
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      project_name: ${{ steps.vars.outputs.project_name }}
+    steps:
+      - id: vars
+        run: echo "project_name=${{ env.PROJECT_NAME }}" >> "$GITHUB_OUTPUT"
+
   deploy-aws-app:
     name: Deploy AWS Application
+    needs: prepare
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     permissions:
       id-token: write # REQUIRED for OIDC
       contents: read
     secrets: inherit
     with:
-      stack-name: stockholm-application
+      stack-name: ${{ needs.prepare.outputs.project_name }}-application
       template: aws/application.yml
-      project: stockholm
+      project: ${{ needs.prepare.outputs.project_name }}
       parameter-overrides: >-
-        ProjectName=stockholm
+        ProjectName=${{ needs.prepare.outputs.project_name }}
+  
+  deploy-sqs:
+    needs: prepare
+    uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
+    with:
+      stack-name: ${{ needs.prepare.outputs.project_name }}-sqs
+      template: aws/sqs.yml
+      parameter-overrides: >-
+        QueueName=${{ needs.prepare.outputs.project_name }}-queue
+      project: ${{ needs.prepare.outputs.project_name }}
+    secrets: inherit
