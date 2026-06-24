@@ -31,12 +31,17 @@ jobs:
         ProjectName=${{ needs.prepare.outputs.project_name }}
   
   deploy-sqs:
-    needs: prepare
+    name: Deploy SQS Queue
+    needs: 
+      - prepare
+      - deploy-aws-app
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     with:
       stack-name: ${{ needs.prepare.outputs.project_name }}-sqs
       template: aws/sqs.yml
       parameter-overrides: >-
-        QueueName=${{ needs.prepare.outputs.project_name }}-queue
+        QueueName=${{ needs.prepare.outputs.project_name }}-queue,
+        AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs).ApplicationTagKey }},
+        AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs).ApplicationTagValue }}
       project: ${{ needs.prepare.outputs.project_name }}
     secrets: inherit

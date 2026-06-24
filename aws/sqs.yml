@@ -3,6 +3,12 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template for SQS queue
 
 Parameters:
+  AppTagKey:
+    Type: String
+    Description: Tag key for the application
+  AppTagValue:
+    Type: String
+    Description: Tag value for the application
   QueueName:
     Type: String
     Description: Name of the SQS queue
@@ -19,6 +25,9 @@ Resources:
       VisibilityTimeout: 300
       MessageRetentionPeriod: 300
       ReceiveMessageWaitTimeSeconds: 0
+      Tags:
+        - Key: !Ref AppTagKey
+          Value: !Ref AppTagValue
 
 Outputs:
   QueueArn:
