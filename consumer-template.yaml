@@ -52,3 +52,10 @@ Resources:
         Variables:
           POWERTOOLS_SERVICE_NAME: !Ref FunctionName
           POWERTOOLS_LOG_LEVEL: INFO
+      Tags:
+        !Sub
+          - |
+            ${AppTagKey}: ${AppTagValue}
+          - AppTagKey: !Ref AppTagKey
+            AppTagValue: !Ref AppTagValue
+
