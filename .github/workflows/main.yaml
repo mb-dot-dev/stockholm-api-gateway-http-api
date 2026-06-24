@@ -115,3 +115,16 @@ jobs:
         with:
           version: 1.161.0
           use-installer: true
+
+      - name: Deploy to AWS Lambda
+        run: |
+          sam deploy \
+            --config-file consumer-samconfig.toml \
+            --stack-name ${{ needs.prepare.outputs.project_name }}-consumer-lambda \
+            --template-file consumer-template.yaml \
+            --parameter-overrides \
+            AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagKey }} \
+            AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }} \
+            FunctionName=${{ needs.prepare.outputs.project_name }}-consumer-lambda \
+            ConsumerExecutionRoleArn=${{ fromJSON(needs.deploy-consumer-iam-role.outputs.stack-outputs-json).ConsumerExecutionRoleArn }} \
+            QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }}

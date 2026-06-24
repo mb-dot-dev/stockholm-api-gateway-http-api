@@ -18,9 +18,6 @@ Parameters:
   QueueArn:
     Type: String
     Description: ARN of the existing SQS queue
-  QueueUrl:
-    Type: String
-    Description: URL of the SQS queue the producer sends messages to
 
 Outputs:
   ConsumerFunctionArn:
