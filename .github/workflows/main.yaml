@@ -192,5 +192,5 @@ jobs:
             AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }} \
             FunctionName=${{ needs.prepare.outputs.project_name }}-producer \
             LambdaExecutionRoleArn=${{ fromJSON(needs.deploy-producer-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }} \
-            QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }}
+            QueueUrl=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueUrl }}
           
