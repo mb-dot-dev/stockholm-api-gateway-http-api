@@ -54,10 +54,25 @@ jobs:
         with:
           name: lambda-zip
           path: lambda.zip
+  
+  cfn-lint:
+    name: CloudFormation Lint
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+
+      - name: Run cfn-lint
+        run: uv run cfn-lint aws/*.yml *-template.yaml
 
   deploy-aws-app:
     name: Deploy AWS Application
-    needs: prepare
+    needs: 
+      - prepare
+      - cfn-lint
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     secrets: inherit
     with:
