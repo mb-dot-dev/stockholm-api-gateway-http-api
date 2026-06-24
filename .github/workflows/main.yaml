@@ -18,6 +18,35 @@ jobs:
       - id: vars
         run: echo "project_name=${{ env.PROJECT_NAME }}" >> "$GITHUB_OUTPUT"
 
+  build-lambda-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Export requirements.txt
+        run: uv export --frozen --no-dev --no-editable -o requirements.txt
+
+      - name: Install dependencies
+        run: |
+          uv pip install \
+          --no-installer-metadata \
+          --no-compile-bytecode \
+          --python-platform x86_64-manylinux2014 \
+          --python 3.14 \
+          --target build \
+          -r requirements.txt
+      - name: Build lambda package
+        run: |
+          cp -r app build/app
+          cd build
+          zip -r ../lambda.zip .
+
+      - name: Upload Lambda ZIP artifact
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: lambda-zip
+          path: lambda.zip
+
   deploy-aws-app:
     name: Deploy AWS Application
     needs: prepare
