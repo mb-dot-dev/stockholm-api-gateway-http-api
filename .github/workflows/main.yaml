@@ -95,3 +95,23 @@ jobs:
         RoleName=${{ needs.prepare.outputs.project_name }}-consumer-lambda
       project: ${{ needs.prepare.outputs.project_name }}
     secrets: inherit
+
+  deploy-consumer-lambda:
+    name: Deploy Consumer Lambda
+    runs-on: ubuntu-latest
+    needs: 
+      - prepare
+      - deploy-aws-app
+      - deploy-sqs
+      - deploy-consumer-iam-role
+    steps:
+      - uses: actions/checkout@v7
+      - name: Download Lambda ZIP artifact
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: lambda-zip
+      - name: Install AWS SAM CLI
+        uses: aws-actions/setup-sam@v2
+        with:
+          version: 1.161.0
+          use-installer: true
