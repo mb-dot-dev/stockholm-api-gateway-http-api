@@ -44,7 +44,7 @@ Resources:
           POWERTOOLS_SERVICE_NAME: !Ref FunctionName
           POWERTOOLS_LOG_LEVEL: INFO
           QUEUE_URL: !Ref QueueUrl
-          ALLOWED_IPS: 
+          ALLOWED_IPS: !Ref AllowedIps
       Tags:
         awsApplication: !Ref AppTagValue
 
