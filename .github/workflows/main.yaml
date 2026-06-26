@@ -253,7 +253,7 @@ jobs:
       stack-name: ${{ needs.prepare.outputs.project_name }}-sqs-policy
       template: aws/sqs-policy.yml
       parameter-overrides: >-
-        QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }},
+        QueueUrl=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueUrl }},
         ProducerRoleArn=${{ fromJSON(needs.deploy-producer-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }},
         ConsumerRoleArn=${{ fromJSON(needs.deploy-consumer-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }}
       project: ${{ needs.prepare.outputs.project_name }}

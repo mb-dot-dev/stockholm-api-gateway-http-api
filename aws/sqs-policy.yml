@@ -6,6 +6,9 @@ Parameters:
   QueueArn:
     Type: String
     Description: ARN of the SQS queue
+  QueueUrl:
+    Type: String
+    Description: URL of the SQS queue
   ProducerRoleArn:
     Type: String
     Description: ARN of the producer IAM role
@@ -18,7 +21,7 @@ Resources:
     Type: AWS::SQS::QueuePolicy
     Properties:
       Queues:
-        - !Ref QueueArn
+        - !Ref QueueUrl
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
