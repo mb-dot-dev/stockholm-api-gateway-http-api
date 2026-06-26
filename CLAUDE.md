@@ -14,7 +14,7 @@ Dependency management and tooling are driven by [uv](https://docs.astral.sh/uv/)
 - `make test` — `lint` + `unit` (the full local gate)
 - `make cfn-lint` — lint all CloudFormation/SAM templates (`aws/*.yml` and `*-template.yaml`)
 
-Tests live in `tests/` (a package — `tests/__init__.py` makes pytest put the repo root on `sys.path`, so `from app import ...` resolves without installing the project). Boto3 clients are accessed via cached factories in `app/clients.py` (e.g. `get_sqs_client`) so importing a handler module has no AWS side effects — in handler tests, patch the name as imported into the handler (`monkeypatch.setattr(producer, "get_sqs_client", ...)`) rather than the module-level client.
+Tests live in `tests/` (a package — `tests/__init__.py` makes pytest put the repo root on `sys.path`, so `from app import ...` resolves without installing the project). Boto3 clients are accessed via cached factories in `app/clients.py` (e.g. `get_sqs_client`) so importing a handler module has no AWS side effects — in handler tests, use moto (`mock_aws`) with a real queue rather than patching `get_sqs_client`; an `autouse` fixture calls `cache_clear()` before each test so a fresh client is created inside the mock context.
 
 ## Lambda packaging
 
@@ -51,7 +51,7 @@ Most `aws/*.yml` stacks deploy through the shared reusable workflow `mb-dot-dev/
 
 ### Deployment & CI notes
 
-- `PROJECT_NAME` is `stockholm` (set in the workflow `env`); resources are named `stockholm-*`. The `name` field in `pyproject.toml` (`auth0-validation`) is unrelated to the deployed stack names.
+- `PROJECT_NAME` is `stockholm` (set in the workflow `env`); resources are named `stockholm-*`. The `name` field in `pyproject.toml` (`stockholm-api-gateway-http-api`) is unrelated to the deployed stack names.
 - Deploys (the `prepare` job and everything gated on it) run **only on push to `main`** — pull requests run lint/build/cfn-lint but do **not** deploy.
 - AWS auth is via OIDC (`DEPLOY_ROLE_ARN` secret); region is `eu-central-1`. `ALLOWED_IPS` and the `JWT_ISSUER`/`JWT_AUDIENCE` repo vars are injected at deploy time, not committed.
 
