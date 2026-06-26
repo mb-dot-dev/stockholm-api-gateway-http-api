@@ -31,7 +31,7 @@ jobs:
   build-lambda-zip:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -50,7 +50,7 @@ jobs:
     name: CloudFormation Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -121,18 +121,18 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Download Lambda ZIP artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: lambda-zip
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           aws-region: eu-central-1
 
       - name: Install AWS SAM CLI
-        uses: aws-actions/setup-sam@v2
+        uses: aws-actions/setup-sam@v3
         with:
           version: 1.161.0
           use-installer: true
@@ -183,18 +183,18 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Download Lambda ZIP artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: lambda-zip
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           aws-region: eu-central-1
 
       - name: Install AWS SAM CLI
-        uses: aws-actions/setup-sam@v2
+        uses: aws-actions/setup-sam@v3
         with:
           version: 1.161.0
           use-installer: true
