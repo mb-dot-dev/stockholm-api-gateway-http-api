@@ -19,8 +19,29 @@ dev = [
     "ty>=0.0.21",
 ]
 
+##### TESTING #####
+
 [tool.pytest.ini_options]
+addopts = "-v"
 testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+relative_files = true
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:", # imports / code here is executed during mypy tests.
+]
+fail_under = 75
+precision = 2
+
+[tool.coverage.xml]
+output = "build/coverage.xml"
+
+#### LINTING ###
 
 [tool.ruff]
 # Set the maximum line length

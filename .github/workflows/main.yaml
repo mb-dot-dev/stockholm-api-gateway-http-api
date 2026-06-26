@@ -33,6 +33,35 @@ jobs:
           echo "JWT_ISSUER=${{ vars.JWT_ISSUER }}" >> "$GITHUB_OUTPUT"
           echo "JWT_AUDIENCE=${{ vars.JWT_AUDIENCE }}" >> "$GITHUB_OUTPUT"
 
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: make install-dev
+
+      - name: Lint
+        run: make lint
+
+      - name: Coverage
+        run: make coverage
+      
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=true
+
   build-lambda-zip:
     runs-on: ubuntu-latest
     steps:
