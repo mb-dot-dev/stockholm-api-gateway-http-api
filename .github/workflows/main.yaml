@@ -31,23 +31,9 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
-      - name: Export requirements.txt
-        run: uv export --frozen --no-dev --no-editable -o requirements.txt
-
-      - name: Install dependencies
-        run: |
-          uv pip install \
-          --no-installer-metadata \
-          --no-compile-bytecode \
-          --python-platform x86_64-manylinux2014 \
-          --python 3.14 \
-          --target build \
-          -r requirements.txt
       - name: Build lambda package
         run: |
-          cp -r app build/app
-          cd build
-          zip -r ../lambda.zip .
+          make build-lambda-package
 
       - name: Upload Lambda ZIP artifact
         uses: actions/upload-artifact@v7.0.1
@@ -66,7 +52,7 @@ jobs:
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
       - name: Run cfn-lint
-        run: uv run cfn-lint aws/*.yml *-template.yaml
+        run: make cfn-lint
 
   deploy-aws-app:
     name: Deploy AWS Application
