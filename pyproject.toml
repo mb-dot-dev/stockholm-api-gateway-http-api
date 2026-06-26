@@ -14,13 +14,35 @@ dev = [
     "cfn-lint>=1.52.0",
     "moto[sqs]>=5.1.0",
     "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
     "requests>=2.34.2",
     "ruff>=0.15.5",
     "ty>=0.0.21",
 ]
 
+##### TESTING #####
+
 [tool.pytest.ini_options]
+addopts = "-v"
 testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+relative_files = true
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:", # imports / code here is executed during mypy tests.
+]
+fail_under = 75
+precision = 2
+
+[tool.coverage.xml]
+output = "build/coverage.xml"
+
+#### LINTING ###
 
 [tool.ruff]
 # Set the maximum line length

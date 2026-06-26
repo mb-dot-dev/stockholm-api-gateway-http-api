@@ -35,6 +35,10 @@ format: 	 ## Format code.
 .PHONY: test
 test: lint unit  ## Run all tests.
 
+.PHONY: coverage
+coverage:
+	uv run --frozen pytest --cov --cov-report=xml
+
 .PHONY: cfn-lint
 cfn-lint:  ## Run CloudFormation linter.
 	uv run cfn-lint aws/*.yml *-template.yaml
