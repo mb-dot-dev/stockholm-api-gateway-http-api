@@ -14,6 +14,7 @@ dev = [
     "cfn-lint>=1.52.0",
     "moto[sqs]>=5.1.0",
     "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
     "requests>=2.34.2",
     "ruff>=0.15.5",
     "ty>=0.0.21",
