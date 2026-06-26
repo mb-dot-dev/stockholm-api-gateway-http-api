@@ -64,6 +64,8 @@ jobs:
 
   build-lambda-zip:
     runs-on: ubuntu-latest
+    needs:
+      - sonarqube
     steps:
       - uses: actions/checkout@v4
 
