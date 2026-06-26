@@ -56,5 +56,4 @@ install-pip-ci: requirements
 .PHONY: build-lambda-package
 build-lambda-package: install-pip-ci  ## Build lambda package.
 	cp -r app build/app
-	cd build
-	zip -r ../lambda.zip .
+	cd build && zip -r ../lambda.zip .
