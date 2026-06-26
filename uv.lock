@@ -43,7 +43,7 @@ requires-dist = [{ name = "aws-lambda-powertools", specifier = ">=3.25.0" }]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "aws-lambda-powertools", extras = ["aws-sdk"], specifier = ">=3.25.0" },
+    { name = "aws-lambda-powertools", extras = ["aws-sdk"], specifier = ">=3.30.0" },
     { name = "cfn-lint", specifier = ">=1.52.0" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "requests", specifier = ">=2.34.2" },

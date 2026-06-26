@@ -10,7 +10,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "aws-lambda-powertools[aws-sdk]>=3.25.0",
+    "aws-lambda-powertools[aws-sdk]>=3.30.0",
     "cfn-lint>=1.52.0",
     "pytest>=9.1.1",
     "requests>=2.34.2",
