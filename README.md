@@ -31,6 +31,7 @@ flowchart TD
     end
 
     APP -->|"ApplicationTagKey\nApplicationTagValue"| SQS
+    APP -->|"ApplicationTagKey\nApplicationTagValue"| PROD_ROLE
     APP -->|"ApplicationTagKey\nApplicationTagValue"| CONS_ROLE
     APP -->|"ApplicationTagValue"| PRODUCER
     APP -->|"ApplicationTagValue"| CONSUMER
