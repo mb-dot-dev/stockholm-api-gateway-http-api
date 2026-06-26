@@ -20,7 +20,7 @@ upgrade:
 
 .PHONY: unit	## Run unit tests.
 unit: 		 ## Run tests.
-	uv run --frozen pytest tests
+	uv run --frozen pytest
 
 .PHONY: lint
 lint: 		 ## Run linter.

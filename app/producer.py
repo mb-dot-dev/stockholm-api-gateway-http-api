@@ -1,48 +1,23 @@
 from __future__ import annotations
 
-import ipaddress
 import json
 import os
 from typing import TYPE_CHECKING
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
-import boto3
 from botocore.exceptions import ClientError
+
+from app.allowlist import is_allowed, parse_allowed_networks
+from app.clients import get_sqs_client
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
-sqs_client = boto3.client("sqs")
-
-IpNetwork = ipaddress.IPv4Network | ipaddress.IPv6Network
 
 
-def _parse_allowed_networks(raw: str) -> list[IpNetwork]:
-    networks: list[IpNetwork] = []
-    for entry in raw.split(","):
-        candidate = entry.strip()
-        if not candidate:
-            continue
-        try:
-            networks.append(ipaddress.ip_network(candidate, strict=False))
-        except ValueError:
-            logger.warning("Ignoring invalid allowlist entry", extra={"entry": candidate})
-    return networks
-
-
-def _is_allowed(source_ip: str | None, networks: list[IpNetwork]) -> bool:
-    if not source_ip or not networks:
-        return False
-    try:
-        address = ipaddress.ip_address(source_ip)
-    except ValueError:
-        return False
-    return any(address in network for network in networks)
-
-
-def _response(status_code: int, message: str) -> dict[str, object]:
+def _build_response(status_code: int, message: str) -> dict[str, object]:
     return {
         "statusCode": status_code,
         "headers": {"content-type": "application/json"},
@@ -57,22 +32,22 @@ def lambda_handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dic
     claims = event.request_context.authorizer.jwt_claim
     principal = claims.get("sub")
 
-    networks = _parse_allowed_networks(os.environ.get("ALLOWED_IPS", ""))
-    if not _is_allowed(source_ip, networks):
+    networks = parse_allowed_networks(os.environ.get("ALLOWED_IPS", ""))
+    if not is_allowed(source_ip, networks):
         logger.warning(
             "Request denied by IP allowlist",
             extra={"sourceIp": source_ip, "principal": principal, "decision": "DENY"},
         )
-        return _response(403, "Forbidden")
+        return _build_response(403, "Forbidden")
 
     try:
-        result = sqs_client.send_message(QueueUrl=os.environ["QUEUE_URL"], MessageBody=event.body or "")
+        result = get_sqs_client().send_message(QueueUrl=os.environ["QUEUE_URL"], MessageBody=event.body or "")
     except ClientError:
         logger.exception(
             "Failed to enqueue message",
             extra={"sourceIp": source_ip, "principal": principal, "decision": "ERROR"},
         )
-        return _response(500, "Internal Server Error")
+        return _build_response(500, "Internal Server Error")
 
     logger.info(
         "Request allowed and enqueued",
@@ -83,4 +58,4 @@ def lambda_handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dic
             "messageId": result["MessageId"],
         },
     )
-    return _response(202, "Accepted")
+    return _build_response(202, "Accepted")

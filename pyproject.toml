@@ -1,5 +1,5 @@
 [project]
-name = "auth0-validation"
+name = "stockholm-api-gateway-http-api"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -12,11 +12,15 @@ dependencies = [
 dev = [
     "aws-lambda-powertools[aws-sdk]>=3.25.0",
     "cfn-lint>=1.52.0",
+    "moto[sqs]>=5.1.0",
     "pytest>=9.1.1",
     "requests>=2.34.2",
     "ruff>=0.15.5",
     "ty>=0.0.21",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.ruff]
 # Set the maximum line length
