@@ -2,6 +2,9 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: IAM role for the consumer Lambda function
 
 Parameters:
+  ProjectName:
+    Type: String
+    Description: Name of the project
   AppTagKey:
     Type: String
     Description: Tag key for the application
@@ -46,5 +49,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Tags:
+        - Key: Project
+          Value: !Ref ProjectName
         - Key: !Ref AppTagKey
           Value: !Ref AppTagValue

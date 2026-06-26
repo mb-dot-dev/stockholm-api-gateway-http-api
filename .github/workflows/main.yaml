@@ -92,6 +92,7 @@ jobs:
       stack-name: ${{ needs.prepare.outputs.project_name }}-sqs
       template: aws/sqs.yml
       parameter-overrides: >-
+        ProjectName=${{ needs.prepare.outputs.project_name }},
         QueueName=${{ needs.prepare.outputs.project_name }}-queue,
         AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagKey }},
         AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }}
@@ -109,6 +110,7 @@ jobs:
       stack-name: ${{ needs.prepare.outputs.project_name }}-consumer-iam-role
       template: aws/consumer-iam-role.yml
       parameter-overrides: >-
+        ProjectName=${{ needs.prepare.outputs.project_name }},
         AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagKey }},
         AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }},
         QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }},
@@ -167,6 +169,9 @@ jobs:
       stack-name: ${{ needs.prepare.outputs.project_name }}-producer-iam-role
       template: aws/producer-iam-role.yml
       parameter-overrides: >-
+        ProjectName=${{ needs.prepare.outputs.project_name }},
+        AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagKey }},
+        AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }},
         QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }},
         RoleName=${{ needs.prepare.outputs.project_name }}-producer-lambda
       project: ${{ needs.prepare.outputs.project_name }}

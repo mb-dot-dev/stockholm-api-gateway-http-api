@@ -3,6 +3,9 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template for SQS queue
 
 Parameters:
+  ProjectName:
+    Type: String
+    Description: Name of the project
   AppTagKey:
     Type: String
     Description: Tag key for the application
@@ -28,6 +31,8 @@ Resources:
       Tags:
         - Key: !Ref AppTagKey
           Value: !Ref AppTagValue
+        - Key: Project
+          Value: !Ref ProjectName
 
 Outputs:
   QueueArn:
