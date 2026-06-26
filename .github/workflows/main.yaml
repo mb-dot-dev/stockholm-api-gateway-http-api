@@ -132,7 +132,7 @@ jobs:
           aws-region: eu-central-1
 
       - name: Install AWS SAM CLI
-        uses: aws-actions/setup-sam@v2
+        uses: aws-actions/setup-sam@v3
         with:
           version: 1.161.0
           use-installer: true
@@ -194,7 +194,7 @@ jobs:
           aws-region: eu-central-1
 
       - name: Install AWS SAM CLI
-        uses: aws-actions/setup-sam@v2
+        uses: aws-actions/setup-sam@v3
         with:
           version: 1.161.0
           use-installer: true
