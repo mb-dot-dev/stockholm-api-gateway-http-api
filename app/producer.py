@@ -32,6 +32,14 @@ def lambda_handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dic
     claims = event.request_context.authorizer.jwt_claim
     principal = claims.get("sub")
 
+    allowed_client_id = os.environ.get("ALLOWED_CLIENT_ID")
+    if allowed_client_id is not None and principal != allowed_client_id:
+        logger.warning(
+            "Request denied by client ID allowlist",
+            extra={"sourceIp": source_ip, "principal": principal, "decision": "DENY"},
+        )
+        return _build_response(403, "Forbidden")
+
     networks = parse_allowed_networks(os.environ.get("ALLOWED_IPS", ""))
     if not is_allowed(source_ip, networks):
         logger.warning(

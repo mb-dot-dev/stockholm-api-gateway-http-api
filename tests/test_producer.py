@@ -22,6 +22,7 @@ AWS_ENV = {
     "AWS_DEFAULT_REGION": "eu-central-1",
 }
 ALLOWED_IPS = "10.0.0.0/8"
+ALLOWED_CLIENT_ID = "clientid@clients"
 
 
 def _build_event(source_ip: str, *, sub: str = "auth0|user", body: str = '{"hello": "world"}') -> dict:
@@ -88,3 +89,24 @@ def test_handler_empty_body_sends_empty_string(sqs_queue: str, lambda_context: F
 
     messages = boto3.client("sqs").receive_message(QueueUrl=sqs_queue).get("Messages", [])
     assert [m["Body"] for m in messages] == [""]
+
+
+def test_handler_disallowed_client_id_is_forbidden(lambda_context: FakeLambdaContext) -> None:
+    with patch.dict(os.environ, {"ALLOWED_CLIENT_ID": ALLOWED_CLIENT_ID}):
+        response = producer.lambda_handler(_build_event("10.1.2.3", sub="other-client@clients"), lambda_context)
+
+    assert response["statusCode"] == 403
+    assert json.loads(response["body"]) == {"message": "Forbidden"}
+
+
+def test_handler_allowed_client_id_is_accepted(sqs_queue: str, lambda_context: FakeLambdaContext) -> None:
+    with patch.dict(os.environ, {"ALLOWED_CLIENT_ID": ALLOWED_CLIENT_ID}):
+        response = producer.lambda_handler(_build_event("10.1.2.3", sub=ALLOWED_CLIENT_ID), lambda_context)
+
+    assert response["statusCode"] == 202
+
+
+def test_handler_no_client_id_restriction_allows_any_client(sqs_queue: str, lambda_context: FakeLambdaContext) -> None:
+    response = producer.lambda_handler(_build_event("10.1.2.3", sub="any-client@clients"), lambda_context)
+
+    assert response["statusCode"] == 202

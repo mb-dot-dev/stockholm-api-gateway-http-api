@@ -18,6 +18,9 @@ Parameters:
   AllowedIps:
     Type: String
     Description: Comma-separated list of allowed IP addresses for the producer Lambda function
+  AllowedClientId:
+    Type: String
+    Description: JWT sub claim value of the single allowed client
 
 Outputs:
   FunctionArn:
@@ -45,6 +48,7 @@ Resources:
           POWERTOOLS_LOG_LEVEL: INFO
           QUEUE_URL: !Ref QueueUrl
           ALLOWED_IPS: !Ref AllowedIps
+          ALLOWED_CLIENT_ID: !Ref AllowedClientId
       Tags:
         awsApplication: !Ref AppTagValue
 
