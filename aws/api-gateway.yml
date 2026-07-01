@@ -60,6 +60,14 @@ Resources:
       AuthorizerId: !Ref JwtAuthorizer
       Target: !Sub "integrations/${ProducerIntegration}"
 
+  OAuthTokenRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: POST /oauth/token
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${ProducerIntegration}"
+
   ProducerInvokePermission:
     Type: AWS::Lambda::Permission
     Properties:
