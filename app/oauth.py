@@ -22,10 +22,10 @@ def issue_token() -> Response:
     headers = dict(event.headers or {})
     body = event.body or ""
 
-    logger.info("OAuth token request", extra={"headers": headers, "body": body})
-
     content_type = headers.get("content-type", "")
     client_id = _parse_client_id(body, content_type)
+
+    logger.info("OAuth token request", extra={"headers": headers, "clientId": client_id})
 
     now = int(time.time())
     claims = {

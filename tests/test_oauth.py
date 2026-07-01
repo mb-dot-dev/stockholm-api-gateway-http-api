@@ -88,3 +88,21 @@ def test_client_id_from_json_body_reflected_in_claims(lambda_context: FakeLambda
     claims = jwt.decode(token, _MOCK_SIGNING_SECRET, algorithms=["HS256"], audience="api://default")
     assert claims["sub"] == "json-client"
     assert claims["cid"] == "json-client"
+
+
+def test_empty_body_falls_back_to_mock_client(lambda_context: FakeLambdaContext) -> None:
+    event = _build_token_event(body="")
+    response = producer.lambda_handler(event, lambda_context)
+    token = json.loads(str(response["body"]))["access_token"]
+    claims = jwt.decode(token, _MOCK_SIGNING_SECRET, algorithms=["HS256"], audience="api://default")
+    assert claims["sub"] == "mock-client"
+    assert claims["cid"] == "mock-client"
+
+
+def test_malformed_json_body_falls_back_to_mock_client(lambda_context: FakeLambdaContext) -> None:
+    event = _build_token_event(body="not-valid-json", content_type="application/json")
+    response = producer.lambda_handler(event, lambda_context)
+    token = json.loads(str(response["body"]))["access_token"]
+    claims = jwt.decode(token, _MOCK_SIGNING_SECRET, algorithms=["HS256"], audience="api://default")
+    assert claims["sub"] == "mock-client"
+    assert claims["cid"] == "mock-client"
