@@ -5,7 +5,7 @@
 ```mermaid
 flowchart TD
     subgraph app_stack["Foundation"]
-        APP["resource-group.yml\n────────────\nOut: ApplicationTagKey\n     ApplicationTagValue"]
+        APP["resource-group.yml\n────────────\ngroups resources\ntagged Project=<project>"]
     end
 
     subgraph sqs_stack["Messaging"]
@@ -29,12 +29,6 @@ flowchart TD
     subgraph api_stack["API Layer"]
         APIGW["api-gateway.yml\n────────────\nOut: ApiEndpoint"]
     end
-
-    APP -->|"ApplicationTagKey\nApplicationTagValue"| SQS
-    APP -->|"ApplicationTagKey\nApplicationTagValue"| PROD_ROLE
-    APP -->|"ApplicationTagKey\nApplicationTagValue"| CONS_ROLE
-    APP -->|"ApplicationTagValue"| PRODUCER
-    APP -->|"ApplicationTagValue"| CONSUMER
 
     SQS -->|"QueueArn"| PROD_ROLE
     SQS -->|"QueueArn"| CONS_ROLE

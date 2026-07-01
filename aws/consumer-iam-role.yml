@@ -5,12 +5,6 @@ Parameters:
   ProjectName:
     Type: String
     Description: Name of the project
-  AppTagKey:
-    Type: String
-    Description: Tag key for the application
-  AppTagValue:
-    Type: String
-    Description: Tag value for the application
   QueueArn:
     Type: String
     Description: ARN of the SQS queue
@@ -51,5 +45,3 @@ Resources:
       Tags:
         - Key: Project
           Value: !Ref ProjectName
-        - Key: !Ref AppTagKey
-          Value: !Ref AppTagValue

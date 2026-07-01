@@ -7,18 +7,12 @@ Parameters:
     Description: The name of the project to which this application belongs.
 
 Outputs:
-  ApplicationTagKey:
-    Description: The key of the tag used to group the application's resources in AWS Resource Groups.
-    Value: Application
-  ApplicationTagValue:
-    Description: The value of the tag used to group the application's resources in AWS Resource Groups.
-    Value: !Ref ProjectName
   ResourceGroupArn:
     Description: The ARN of the tag-based resource group containing the application's resources.
     Value: !GetAtt ApplicationResourceGroup.Arn
 
 Resources:
-  # Tag-based resource group: every resource tagged Application=<ProjectName>
+  # Tag-based resource group: every resource tagged Project=<ProjectName>
   # automatically shows up in this group in the AWS Resource Groups console.
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
@@ -31,7 +25,7 @@ Resources:
           ResourceTypeFilters:
             - AWS::AllSupported
           TagFilters:
-            - Key: Application
+            - Key: Project
               Values:
                 - !Ref ProjectName
       Tags:

@@ -3,9 +3,9 @@ Transform: AWS::Serverless-2016-10-31
 Description: Serverless application with producer Lambda function
 
 Parameters:
-  AppTagValue:
+  ProjectName:
     Type: String
-    Description: Tag value for the application
+    Description: Name of the project
   FunctionName:
     Type: String
     Description: Name of the producer Lambda function
@@ -50,5 +50,5 @@ Resources:
           ALLOWED_IPS: !Ref AllowedIps
           ALLOWED_CLIENT_ID: !Ref AllowedClientId
       Tags:
-        Application: !Ref AppTagValue
+        Project: !Ref ProjectName
 
