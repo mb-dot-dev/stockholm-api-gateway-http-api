@@ -37,7 +37,7 @@ Resources:
     Properties:
       FunctionName: !Ref FunctionName
       Runtime: python3.14
-      Handler: app.producer.lambda_handler
+      Handler: app.api_gateway.lambda_handler
       CodeUri: lambda.zip
       Role: !Ref LambdaExecutionRoleArn
       Timeout: 10

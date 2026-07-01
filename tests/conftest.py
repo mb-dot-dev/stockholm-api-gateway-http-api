@@ -1,4 +1,4 @@
-from __future__ import annotations
+import json
 
 from aws_lambda_powertools.utilities.typing import LambdaContext
 import pytest
@@ -17,3 +17,12 @@ class FakeLambdaContext(LambdaContext):
 @pytest.fixture
 def lambda_context() -> FakeLambdaContext:
     return FakeLambdaContext()
+
+
+def find_emf_metric(capsys: pytest.CaptureFixture[str], name: str) -> dict:
+    """Find and return the EMF payload that published the named metric from captured stdout."""
+    for line in capsys.readouterr().out.strip().splitlines():
+        payload = json.loads(line)
+        if "_aws" in payload and name in payload:
+            return payload
+    pytest.fail(f"metric {name!r} not found in captured stdout")

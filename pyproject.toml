@@ -27,6 +27,11 @@ dev = [
 addopts = "-v"
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
+filterwarnings = [
+    # Expected: only failure/denial paths emit custom metrics, so success-path tests
+    # legitimately flush an empty metric set.
+    "ignore:No application metrics to publish.*:UserWarning:aws_lambda_powertools.metrics.provider.base",
+]
 
 [tool.coverage.run]
 branch = true

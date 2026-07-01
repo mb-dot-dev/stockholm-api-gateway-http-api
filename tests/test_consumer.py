@@ -1,11 +1,12 @@
-from __future__ import annotations
-
 import json
 from typing import TYPE_CHECKING
 
 from app import consumer
+from tests.conftest import find_emf_metric
 
 if TYPE_CHECKING:
+    import pytest
+
     from tests.conftest import FakeLambdaContext
 
 
@@ -43,3 +44,14 @@ def test_lambda_handler_reports_partial_failure_on_invalid_json(lambda_context: 
     result = consumer.lambda_handler(event, lambda_context)
 
     assert result["batchItemFailures"] == [{"itemIdentifier": "msg-1"}]
+
+
+def test_lambda_handler_reports_partial_failure_emits_batch_item_failure_metric(
+    capsys: pytest.CaptureFixture[str], lambda_context: FakeLambdaContext
+) -> None:
+    event = _sqs_event(json.dumps({"a": 1}), "not-json")
+
+    consumer.lambda_handler(event, lambda_context)
+
+    metric = find_emf_metric(capsys, "BatchItemFailure")
+    assert metric["BatchItemFailure"] == [1.0]

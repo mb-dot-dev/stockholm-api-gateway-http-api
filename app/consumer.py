@@ -1,26 +1,32 @@
-from __future__ import annotations
-
+import json
 from typing import TYPE_CHECKING
 
 from aws_lambda_powertools import Logger, Metrics
+from aws_lambda_powertools.metrics import MetricUnit
 from aws_lambda_powertools.utilities.batch import (
     BatchProcessor,
     EventType,
     process_partial_response,
 )
+from aws_lambda_powertools.utilities.data_classes import (
+    SQSRecord,  # noqa: TC002 (BatchProcessor introspects this annotation at runtime)
+)
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
-    from aws_lambda_powertools.utilities.data_classes import SQSRecord
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 processor = BatchProcessor(event_type=EventType.SQS)
 logger = Logger()
-metrics = Metrics()
+metrics = Metrics(namespace="Stockholm")
 
 
 def record_handler(record: SQSRecord) -> None:
-    payload: dict = record.json_body
+    try:
+        payload: dict = record.json_body
+    except json.JSONDecodeError:
+        metrics.add_metric(name="BatchItemFailure", unit=MetricUnit.Count, value=1)
+        raise
 
     logger.info("Processing record", extra={"payload": payload})
 

@@ -1,16 +1,15 @@
-from __future__ import annotations
-
 import json
 import os
 import time
 import urllib.parse
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.event_handler.api_gateway import Response, Router
+from aws_lambda_powertools.event_handler.api_gateway import Response
+from aws_lambda_powertools.event_handler.router import APIGatewayHttpRouter
 import jwt
 
 logger = Logger()
-router = Router()
+router = APIGatewayHttpRouter()
 
 _MOCK_SIGNING_SECRET = "mock-only-not-a-real-secret-do-not-use-in-production"  # noqa: S105
 _DEFAULT_ISSUER = "https://mock-okta.example.com/oauth2/default"

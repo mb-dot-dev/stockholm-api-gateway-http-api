@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import ipaddress
 
 from app import allowlist
