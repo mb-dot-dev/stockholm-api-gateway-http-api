@@ -176,7 +176,8 @@ jobs:
             ProjectName=${{ needs.prepare.outputs.project_name }} \
             FunctionName=${{ needs.prepare.outputs.project_name }}-consumer \
             LambdaExecutionRoleArn=${{ fromJSON(needs.deploy-consumer-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }} \
-            QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }}
+            QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }} \
+            --tags Project=${{ needs.prepare.outputs.project_name }}
 
   deploy-producer-iam-role:
     name: Deploy Producer IAM Role
@@ -236,7 +237,8 @@ jobs:
             LambdaExecutionRoleArn=${{ fromJSON(needs.deploy-producer-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }} \
             QueueUrl=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueUrl }} \
             AllowedIps=${{ secrets.ALLOWED_IPS }} \
-            AllowedClientId=${{ secrets.ALLOWED_CLIENT_ID }}
+            AllowedClientId=${{ secrets.ALLOWED_CLIENT_ID }} \
+            --tags Project=${{ needs.prepare.outputs.project_name }}
       
       - name: Output Lambda function details
         id: output
@@ -248,7 +250,6 @@ jobs:
     name: Deploy API Gateway
     needs:
       - prepare
-      - deploy-resource-group
       - deploy-producer-lambda
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     with:

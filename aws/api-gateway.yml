@@ -29,6 +29,8 @@ Resources:
     Properties:
       Name: !Sub "${ProjectName}-api"
       ProtocolType: HTTP
+      Tags:
+        Name: !Sub "${ProjectName}-api"
 
   JwtAuthorizer:
     Type: AWS::ApiGatewayV2::Authorizer
@@ -80,6 +82,9 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "/aws/apigateway/${ProjectName}-api"
+      Tags:
+        - Key: Name
+          Value: !Sub "/aws/apigateway/${ProjectName}-api"
 
   DefaultStage:
     Type: AWS::ApiGatewayV2::Stage
@@ -87,6 +92,8 @@ Resources:
       ApiId: !Ref HttpApi
       StageName: $default
       AutoDeploy: true
+      Tags:
+        Name: !Sub "${ProjectName}-api-default-stage"
       AccessLogSettings:
         DestinationArn: !GetAtt ApiAccessLogGroup.Arn
         Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","routeKey":"$context.routeKey","status":"$context.status","protocol":"$context.protocol","responseLength":"$context.responseLength","integrationStatus":"$context.integrationStatus","authorizerError":"$context.authorizer.error"}'

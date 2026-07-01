@@ -45,3 +45,5 @@ Resources:
       Tags:
         - Key: Project
           Value: !Ref ProjectName
+        - Key: Name
+          Value: !Ref RoleName

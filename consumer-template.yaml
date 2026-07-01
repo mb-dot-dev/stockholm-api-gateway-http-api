@@ -51,4 +51,16 @@ Resources:
           POWERTOOLS_LOG_LEVEL: INFO
       Tags:
         Project: !Ref ProjectName
+        Name: !Ref FunctionName
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${FunctionName}"
+      RetentionInDays: 30
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Name
+          Value: !Sub "/aws/lambda/${FunctionName}"
 
