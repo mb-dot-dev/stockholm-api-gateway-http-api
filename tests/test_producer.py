@@ -30,8 +30,10 @@ def _build_event(source_ip: str, *, sub: str = "auth0|user", body: str = '{"hell
         "version": "2.0",
         "routeKey": "POST /",
         "rawPath": "/",
+        "rawQueryString": "",
         "body": body,
         "requestContext": {
+            "stage": "$default",
             "http": {
                 "method": "POST",
                 "path": "/",
@@ -60,11 +62,8 @@ def sqs_queue() -> Iterator[str]:
 def test_handler_allowed_request_is_enqueued(sqs_queue: str, lambda_context: FakeLambdaContext) -> None:
     response = producer.lambda_handler(_build_event("10.1.2.3"), lambda_context)
 
-    assert response == {
-        "statusCode": 202,
-        "headers": {"content-type": "application/json"},
-        "body": json.dumps({"message": "Accepted"}),
-    }
+    assert response["statusCode"] == 202
+    assert json.loads(str(response["body"])) == {"message": "Accepted"}
     messages = boto3.client("sqs").receive_message(QueueUrl=sqs_queue).get("Messages", [])
     assert [m["Body"] for m in messages] == ['{"hello": "world"}']
 
@@ -73,7 +72,7 @@ def test_handler_disallowed_ip_is_forbidden(lambda_context: FakeLambdaContext) -
     response = producer.lambda_handler(_build_event("192.168.1.1"), lambda_context)
 
     assert response["statusCode"] == 403
-    assert json.loads(response["body"]) == {"message": "Forbidden"}
+    assert json.loads(str(response["body"])) == {"message": "Forbidden"}
 
 
 def test_handler_sqs_failure_returns_500(lambda_context: FakeLambdaContext) -> None:
@@ -96,7 +95,7 @@ def test_handler_disallowed_client_id_is_forbidden(lambda_context: FakeLambdaCon
         response = producer.lambda_handler(_build_event("10.1.2.3", sub="other-client@clients"), lambda_context)
 
     assert response["statusCode"] == 403
-    assert json.loads(response["body"]) == {"message": "Forbidden"}
+    assert json.loads(str(response["body"])) == {"message": "Forbidden"}
 
 
 def test_handler_allowed_client_id_is_accepted(sqs_queue: str, lambda_context: FakeLambdaContext) -> None:

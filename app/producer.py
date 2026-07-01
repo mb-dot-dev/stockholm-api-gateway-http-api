@@ -5,29 +5,25 @@ import os
 from typing import TYPE_CHECKING
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
+from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+from aws_lambda_powertools.event_handler.api_gateway import Response
 from botocore.exceptions import ClientError
 
 from app.allowlist import is_allowed, parse_allowed_networks
 from app.clients import get_sqs_client
+from app.oauth import router as oauth_router
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
+app = APIGatewayHttpResolver()
+app.include_router(oauth_router)
 
 
-def _build_response(status_code: int, message: str) -> dict[str, object]:
-    return {
-        "statusCode": status_code,
-        "headers": {"content-type": "application/json"},
-        "body": json.dumps({"message": message}),
-    }
-
-
-@logger.inject_lambda_context
-@event_source(data_class=APIGatewayProxyEventV2)
-def lambda_handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dict[str, object]:  # noqa: ARG001
+@app.post("/")
+def _enqueue() -> Response:
+    event = app.current_event
     source_ip = event.request_context.http.source_ip
     claims = event.request_context.authorizer.jwt_claim
     principal = claims.get("sub")
@@ -38,7 +34,7 @@ def lambda_handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dic
             "Request denied by client ID allowlist",
             extra={"sourceIp": source_ip, "principal": principal, "decision": "DENY"},
         )
-        return _build_response(403, "Forbidden")
+        return Response(status_code=403, content_type="application/json", body=json.dumps({"message": "Forbidden"}))
 
     networks = parse_allowed_networks(os.environ.get("ALLOWED_IPS", ""))
     if not is_allowed(source_ip, networks):
@@ -46,7 +42,7 @@ def lambda_handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dic
             "Request denied by IP allowlist",
             extra={"sourceIp": source_ip, "principal": principal, "decision": "DENY"},
         )
-        return _build_response(403, "Forbidden")
+        return Response(status_code=403, content_type="application/json", body=json.dumps({"message": "Forbidden"}))
 
     try:
         result = get_sqs_client().send_message(QueueUrl=os.environ["QUEUE_URL"], MessageBody=event.body or "")
@@ -55,7 +51,11 @@ def lambda_handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dic
             "Failed to enqueue message",
             extra={"sourceIp": source_ip, "principal": principal, "decision": "ERROR"},
         )
-        return _build_response(500, "Internal Server Error")
+        return Response(
+            status_code=500,
+            content_type="application/json",
+            body=json.dumps({"message": "Internal Server Error"}),
+        )
 
     logger.info(
         "Request allowed and enqueued",
@@ -66,4 +66,9 @@ def lambda_handler(event: APIGatewayProxyEventV2, context: LambdaContext) -> dic
             "messageId": result["MessageId"],
         },
     )
-    return _build_response(202, "Accepted")
+    return Response(status_code=202, content_type="application/json", body=json.dumps({"message": "Accepted"}))
+
+
+@logger.inject_lambda_context
+def lambda_handler(event: dict[str, object], context: LambdaContext) -> dict[str, object]:
+    return app.resolve(event, context)
