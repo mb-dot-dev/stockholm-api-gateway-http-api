@@ -50,5 +50,5 @@ Resources:
           POWERTOOLS_SERVICE_NAME: !Ref FunctionName
           POWERTOOLS_LOG_LEVEL: INFO
       Tags:
-        awsApplication: !Ref AppTagValue
+        Application: !Ref AppTagValue
 

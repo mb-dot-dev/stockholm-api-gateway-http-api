@@ -40,7 +40,7 @@ Client → API Gateway (HTTP API v2, Auth0 JWT authorizer) → Producer Lambda �
 
 Infrastructure is split across many small CloudFormation/SAM stacks, deployed **in dependency order entirely by GitHub Actions** (`.github/workflows/main.yaml`) — there is no single root template. Each stack exports outputs that later stacks consume as parameters. The deploy order and data flow are documented in the Mermaid diagram in `README.md`. Key stacks:
 
-- `aws/application.yml` — AppRegistry application; exports the app tag key/value applied to all other resources.
+- `aws/resource-group.yml` — tag-based Resource Groups group; exports the app tag key/value (`Application=<project>`) applied to all other resources so they appear in the group.
 - `aws/sqs.yml` — the queue (`VisibilityTimeout`/retention both 300s).
 - `aws/producer-iam-role.yml`, `aws/consumer-iam-role.yml` — Lambda execution roles. Roles are created **separately and before** the Lambdas (the SAM templates reference them by ARN via `LambdaExecutionRoleArn`).
 - `producer-template.yaml`, `consumer-template.yaml` — the two SAM Lambda stacks (root-level, not under `aws/`). Deployed with `sam deploy` directly in CI, not via the reusable workflow.

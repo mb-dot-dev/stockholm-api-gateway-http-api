@@ -94,16 +94,16 @@ jobs:
       - name: Run cfn-lint
         run: make cfn-lint
 
-  deploy-aws-app:
-    name: Deploy AWS Application
-    needs: 
+  deploy-resource-group:
+    name: Deploy Resource Group
+    needs:
       - prepare
       - cfn-lint
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     secrets: inherit
     with:
-      stack-name: ${{ needs.prepare.outputs.project_name }}-application
-      template: aws/application.yml
+      stack-name: ${{ needs.prepare.outputs.project_name }}-resource-group
+      template: aws/resource-group.yml
       project: ${{ needs.prepare.outputs.project_name }}
       parameter-overrides: >-
         ProjectName=${{ needs.prepare.outputs.project_name }}
@@ -112,7 +112,7 @@ jobs:
     name: Deploy SQS Queue
     needs: 
       - prepare
-      - deploy-aws-app
+      - deploy-resource-group
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     with:
       stack-name: ${{ needs.prepare.outputs.project_name }}-sqs
@@ -120,8 +120,8 @@ jobs:
       parameter-overrides: >-
         ProjectName=${{ needs.prepare.outputs.project_name }},
         QueueName=${{ needs.prepare.outputs.project_name }}-queue,
-        AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagKey }},
-        AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }}
+        AppTagKey=${{ fromJSON(needs.deploy-resource-group.outputs.stack-outputs-json).ApplicationTagKey }},
+        AppTagValue=${{ fromJSON(needs.deploy-resource-group.outputs.stack-outputs-json).ApplicationTagValue }}
       project: ${{ needs.prepare.outputs.project_name }}
     secrets: inherit
 
@@ -129,7 +129,7 @@ jobs:
     name: Deploy Consumer IAM Role
     needs: 
       - prepare
-      - deploy-aws-app
+      - deploy-resource-group
       - deploy-sqs
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     with:
@@ -137,8 +137,8 @@ jobs:
       template: aws/consumer-iam-role.yml
       parameter-overrides: >-
         ProjectName=${{ needs.prepare.outputs.project_name }},
-        AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagKey }},
-        AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }},
+        AppTagKey=${{ fromJSON(needs.deploy-resource-group.outputs.stack-outputs-json).ApplicationTagKey }},
+        AppTagValue=${{ fromJSON(needs.deploy-resource-group.outputs.stack-outputs-json).ApplicationTagValue }},
         QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }},
         RoleName=${{ needs.prepare.outputs.project_name }}-consumer-lambda
       project: ${{ needs.prepare.outputs.project_name }}
@@ -150,7 +150,7 @@ jobs:
     needs: 
       - prepare
       - build-lambda-zip
-      - deploy-aws-app
+      - deploy-resource-group
       - deploy-sqs
       - deploy-consumer-iam-role
     steps:
@@ -179,7 +179,7 @@ jobs:
             --stack-name ${{ needs.prepare.outputs.project_name }}-consumer-lambda \
             --template-file consumer-template.yaml \
             --parameter-overrides \
-            AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }} \
+            AppTagValue=${{ fromJSON(needs.deploy-resource-group.outputs.stack-outputs-json).ApplicationTagValue }} \
             FunctionName=${{ needs.prepare.outputs.project_name }}-consumer \
             LambdaExecutionRoleArn=${{ fromJSON(needs.deploy-consumer-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }} \
             QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }}
@@ -188,7 +188,7 @@ jobs:
     name: Deploy Producer IAM Role
     needs: 
       - prepare
-      - deploy-aws-app
+      - deploy-resource-group
       - deploy-sqs
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     with:
@@ -196,8 +196,8 @@ jobs:
       template: aws/producer-iam-role.yml
       parameter-overrides: >-
         ProjectName=${{ needs.prepare.outputs.project_name }},
-        AppTagKey=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagKey }},
-        AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }},
+        AppTagKey=${{ fromJSON(needs.deploy-resource-group.outputs.stack-outputs-json).ApplicationTagKey }},
+        AppTagValue=${{ fromJSON(needs.deploy-resource-group.outputs.stack-outputs-json).ApplicationTagValue }},
         QueueArn=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueArn }},
         RoleName=${{ needs.prepare.outputs.project_name }}-producer-lambda
       project: ${{ needs.prepare.outputs.project_name }}
@@ -209,7 +209,7 @@ jobs:
     needs: 
       - prepare
       - build-lambda-zip
-      - deploy-aws-app
+      - deploy-resource-group
       - deploy-sqs
       - deploy-producer-iam-role
     outputs:
@@ -241,7 +241,7 @@ jobs:
             --stack-name ${{ needs.prepare.outputs.project_name }}-producer-lambda \
             --template-file producer-template.yaml \
             --parameter-overrides \
-            AppTagValue=${{ fromJSON(needs.deploy-aws-app.outputs.stack-outputs-json).ApplicationTagValue }} \
+            AppTagValue=${{ fromJSON(needs.deploy-resource-group.outputs.stack-outputs-json).ApplicationTagValue }} \
             FunctionName=${{ needs.prepare.outputs.project_name }}-producer \
             LambdaExecutionRoleArn=${{ fromJSON(needs.deploy-producer-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }} \
             QueueUrl=${{ fromJSON(needs.deploy-sqs.outputs.stack-outputs-json).QueueUrl }} \
@@ -258,7 +258,7 @@ jobs:
     name: Deploy API Gateway
     needs:
       - prepare
-      - deploy-aws-app
+      - deploy-resource-group
       - deploy-producer-lambda
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     with:

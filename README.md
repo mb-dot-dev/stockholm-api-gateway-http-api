@@ -5,7 +5,7 @@
 ```mermaid
 flowchart TD
     subgraph app_stack["Foundation"]
-        APP["application.yml\n────────────\nOut: ApplicationTagKey\n     ApplicationTagValue"]
+        APP["resource-group.yml\n────────────\nOut: ApplicationTagKey\n     ApplicationTagValue"]
     end
 
     subgraph sqs_stack["Messaging"]

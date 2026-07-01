@@ -50,5 +50,5 @@ Resources:
           ALLOWED_IPS: !Ref AllowedIps
           ALLOWED_CLIENT_ID: !Ref AllowedClientId
       Tags:
-        awsApplication: !Ref AppTagValue
+        Application: !Ref AppTagValue
 
