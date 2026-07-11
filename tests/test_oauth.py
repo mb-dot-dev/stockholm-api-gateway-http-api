@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 import jwt
 
-from app import api_gateway
+from app import main
 from app.oauth import _MOCK_SIGNING_SECRET
 
 if TYPE_CHECKING:
@@ -33,12 +33,12 @@ def _build_token_event(
 
 
 def test_token_endpoint_returns_200(lambda_context: FakeLambdaContext) -> None:
-    response = api_gateway.lambda_handler(_build_token_event(), lambda_context)
+    response = main.lambda_handler(_build_token_event(), lambda_context)
     assert response["statusCode"] == 200
 
 
 def test_token_response_shape(lambda_context: FakeLambdaContext) -> None:
-    response = api_gateway.lambda_handler(_build_token_event(), lambda_context)
+    response = main.lambda_handler(_build_token_event(), lambda_context)
     body = json.loads(str(response["body"]))
     assert "access_token" in body
     assert body["token_type"] == "Bearer"
@@ -47,7 +47,7 @@ def test_token_response_shape(lambda_context: FakeLambdaContext) -> None:
 
 
 def test_token_has_okta_style_claims(lambda_context: FakeLambdaContext) -> None:
-    response = api_gateway.lambda_handler(_build_token_event(), lambda_context)
+    response = main.lambda_handler(_build_token_event(), lambda_context)
     token = json.loads(str(response["body"]))["access_token"]
     claims = jwt.decode(token, _MOCK_SIGNING_SECRET, algorithms=["HS256"], audience="api://default")
     assert claims["sub"] == "test-client"
@@ -60,7 +60,7 @@ def test_token_has_okta_style_claims(lambda_context: FakeLambdaContext) -> None:
 
 def test_client_id_from_form_body_reflected_in_claims(lambda_context: FakeLambdaContext) -> None:
     event = _build_token_event(body="client_id=my-app&grant_type=client_credentials")
-    response = api_gateway.lambda_handler(event, lambda_context)
+    response = main.lambda_handler(event, lambda_context)
     token = json.loads(str(response["body"]))["access_token"]
     claims = jwt.decode(token, _MOCK_SIGNING_SECRET, algorithms=["HS256"], audience="api://default")
     assert claims["sub"] == "my-app"
@@ -69,7 +69,7 @@ def test_client_id_from_form_body_reflected_in_claims(lambda_context: FakeLambda
 
 def test_missing_client_id_falls_back_to_mock_client(lambda_context: FakeLambdaContext) -> None:
     event = _build_token_event(body="grant_type=client_credentials")
-    response = api_gateway.lambda_handler(event, lambda_context)
+    response = main.lambda_handler(event, lambda_context)
     token = json.loads(str(response["body"]))["access_token"]
     claims = jwt.decode(token, _MOCK_SIGNING_SECRET, algorithms=["HS256"], audience="api://default")
     assert claims["sub"] == "mock-client"
@@ -81,7 +81,7 @@ def test_client_id_from_json_body_reflected_in_claims(lambda_context: FakeLambda
         body=json.dumps({"client_id": "json-client"}),
         content_type="application/json",
     )
-    response = api_gateway.lambda_handler(event, lambda_context)
+    response = main.lambda_handler(event, lambda_context)
     token = json.loads(str(response["body"]))["access_token"]
     claims = jwt.decode(token, _MOCK_SIGNING_SECRET, algorithms=["HS256"], audience="api://default")
     assert claims["sub"] == "json-client"
@@ -90,7 +90,7 @@ def test_client_id_from_json_body_reflected_in_claims(lambda_context: FakeLambda
 
 def test_empty_body_falls_back_to_mock_client(lambda_context: FakeLambdaContext) -> None:
     event = _build_token_event(body="")
-    response = api_gateway.lambda_handler(event, lambda_context)
+    response = main.lambda_handler(event, lambda_context)
     token = json.loads(str(response["body"]))["access_token"]
     claims = jwt.decode(token, _MOCK_SIGNING_SECRET, algorithms=["HS256"], audience="api://default")
     assert claims["sub"] == "mock-client"
@@ -99,7 +99,7 @@ def test_empty_body_falls_back_to_mock_client(lambda_context: FakeLambdaContext)
 
 def test_malformed_json_body_falls_back_to_mock_client(lambda_context: FakeLambdaContext) -> None:
     event = _build_token_event(body="not-valid-json", content_type="application/json")
-    response = api_gateway.lambda_handler(event, lambda_context)
+    response = main.lambda_handler(event, lambda_context)
     token = json.loads(str(response["body"]))["access_token"]
     claims = jwt.decode(token, _MOCK_SIGNING_SECRET, algorithms=["HS256"], audience="api://default")
     assert claims["sub"] == "mock-client"

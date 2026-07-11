@@ -1,20 +1,21 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: IAM role for the consumer Lambda function
+Description: IAM roles for the producer Lambda functions
 
 Parameters:
   ProjectName:
     Type: String
     Description: Name of the project
   QueueArn:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     Description: ARN of the SQS queue
+    Default: /sqs/oslo/queue-arn
   RoleName:
     Type: String
-    Description: Name of the IAM role for the consumer Lambda function
+    Description: Name of the IAM role for the producer Lambda function
 
 Outputs:
   LambdaExecutionRoleArn:
-    Description: ARN of the consumer Lambda execution role
+    Description: ARN of the producer Lambda execution role
     Value: !GetAtt LambdaExecutionRole.Arn
 
 Resources:
@@ -35,10 +36,7 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action:
-                  - sqs:ReceiveMessage
-                  - sqs:DeleteMessage
-                  - sqs:GetQueueAttributes
+                Action: sqs:SendMessage
                 Resource: !Ref QueueArn
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole

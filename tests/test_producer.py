@@ -7,7 +7,7 @@ import boto3
 from moto import mock_aws
 import pytest
 
-from app import api_gateway, clients
+from app import clients, main
 from tests.conftest import find_emf_metric
 
 if TYPE_CHECKING:
@@ -59,7 +59,7 @@ def sqs_queue() -> Iterator[str]:
 
 
 def test_handler_allowed_request_is_enqueued(sqs_queue: str, lambda_context: FakeLambdaContext) -> None:
-    response = api_gateway.lambda_handler(_build_event("10.1.2.3"), lambda_context)
+    response = main.lambda_handler(_build_event("10.1.2.3"), lambda_context)
 
     assert response["statusCode"] == 202
     assert json.loads(str(response["body"])) == {"message": "Accepted"}
@@ -68,7 +68,7 @@ def test_handler_allowed_request_is_enqueued(sqs_queue: str, lambda_context: Fak
 
 
 def test_handler_disallowed_ip_is_forbidden(lambda_context: FakeLambdaContext) -> None:
-    response = api_gateway.lambda_handler(_build_event("192.168.1.1"), lambda_context)
+    response = main.lambda_handler(_build_event("192.168.1.1"), lambda_context)
 
     assert response["statusCode"] == 403
     assert json.loads(str(response["body"])) == {"message": "Forbidden"}
@@ -77,13 +77,13 @@ def test_handler_disallowed_ip_is_forbidden(lambda_context: FakeLambdaContext) -
 def test_handler_sqs_failure_returns_500(lambda_context: FakeLambdaContext) -> None:
     bad_url = "https://sqs.eu-central-1.amazonaws.com/123456789012/nonexistent"
     with mock_aws(), patch.dict(os.environ, {"QUEUE_URL": bad_url}):
-        response = api_gateway.lambda_handler(_build_event("10.1.2.3"), lambda_context)
+        response = main.lambda_handler(_build_event("10.1.2.3"), lambda_context)
 
     assert response["statusCode"] == 500
 
 
 def test_handler_empty_body_sends_empty_string(sqs_queue: str, lambda_context: FakeLambdaContext) -> None:
-    api_gateway.lambda_handler(_build_event("10.1.2.3", body=""), lambda_context)
+    main.lambda_handler(_build_event("10.1.2.3", body=""), lambda_context)
 
     messages = boto3.client("sqs").receive_message(QueueUrl=sqs_queue).get("Messages", [])
     assert [m["Body"] for m in messages] == [""]
@@ -91,7 +91,7 @@ def test_handler_empty_body_sends_empty_string(sqs_queue: str, lambda_context: F
 
 def test_handler_disallowed_client_id_is_forbidden(lambda_context: FakeLambdaContext) -> None:
     with patch.dict(os.environ, {"ALLOWED_CLIENT_ID": ALLOWED_CLIENT_ID}):
-        response = api_gateway.lambda_handler(_build_event("10.1.2.3", sub="other-client@clients"), lambda_context)
+        response = main.lambda_handler(_build_event("10.1.2.3", sub="other-client@clients"), lambda_context)
 
     assert response["statusCode"] == 403
     assert json.loads(str(response["body"])) == {"message": "Forbidden"}
@@ -99,13 +99,13 @@ def test_handler_disallowed_client_id_is_forbidden(lambda_context: FakeLambdaCon
 
 def test_handler_allowed_client_id_is_accepted(sqs_queue: str, lambda_context: FakeLambdaContext) -> None:
     with patch.dict(os.environ, {"ALLOWED_CLIENT_ID": ALLOWED_CLIENT_ID}):
-        response = api_gateway.lambda_handler(_build_event("10.1.2.3", sub=ALLOWED_CLIENT_ID), lambda_context)
+        response = main.lambda_handler(_build_event("10.1.2.3", sub=ALLOWED_CLIENT_ID), lambda_context)
 
     assert response["statusCode"] == 202
 
 
 def test_handler_no_client_id_restriction_allows_any_client(sqs_queue: str, lambda_context: FakeLambdaContext) -> None:
-    response = api_gateway.lambda_handler(_build_event("10.1.2.3", sub="any-client@clients"), lambda_context)
+    response = main.lambda_handler(_build_event("10.1.2.3", sub="any-client@clients"), lambda_context)
 
     assert response["statusCode"] == 202
 
@@ -113,7 +113,7 @@ def test_handler_no_client_id_restriction_allows_any_client(sqs_queue: str, lamb
 def test_handler_disallowed_ip_emits_denied_metric(
     capsys: pytest.CaptureFixture[str], lambda_context: FakeLambdaContext
 ) -> None:
-    api_gateway.lambda_handler(_build_event("192.168.1.1"), lambda_context)
+    main.lambda_handler(_build_event("192.168.1.1"), lambda_context)
 
     metric = find_emf_metric(capsys, "RequestDenied")
     assert metric["RequestDenied"] == [1.0]
@@ -124,7 +124,7 @@ def test_handler_disallowed_client_id_emits_denied_metric(
     capsys: pytest.CaptureFixture[str], lambda_context: FakeLambdaContext
 ) -> None:
     with patch.dict(os.environ, {"ALLOWED_CLIENT_ID": ALLOWED_CLIENT_ID}):
-        api_gateway.lambda_handler(_build_event("10.1.2.3", sub="other-client@clients"), lambda_context)
+        main.lambda_handler(_build_event("10.1.2.3", sub="other-client@clients"), lambda_context)
 
     metric = find_emf_metric(capsys, "RequestDenied")
     assert metric["RequestDenied"] == [1.0]
@@ -136,7 +136,7 @@ def test_handler_sqs_failure_emits_enqueue_failure_metric(
 ) -> None:
     bad_url = "https://sqs.eu-central-1.amazonaws.com/123456789012/nonexistent"
     with mock_aws(), patch.dict(os.environ, {"QUEUE_URL": bad_url}):
-        api_gateway.lambda_handler(_build_event("10.1.2.3"), lambda_context)
+        main.lambda_handler(_build_event("10.1.2.3"), lambda_context)
 
     metric = find_emf_metric(capsys, "EnqueueFailure")
     assert metric["EnqueueFailure"] == [1.0]
