@@ -6,8 +6,9 @@ Parameters:
     Type: String
     Description: Name of the project
   QueueArn:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     Description: ARN of the SQS queue
+    Default: /sqs/oslo/queue-arn
   RoleName:
     Type: String
     Description: Name of the IAM role for the producer Lambda function
