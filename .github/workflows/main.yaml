@@ -112,6 +112,7 @@ jobs:
     name: Deploy IAM Role
     needs:
       - prepare
+      - cfn-lint
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     with:
       stack-name: ${{ needs.prepare.outputs.project_name }}-iam-role
@@ -129,6 +130,7 @@ jobs:
       - prepare
       - build-lambda-zip
       - deploy-iam-role
+      - cfn-lint
     outputs:
       function_arn: ${{ steps.output.outputs.FunctionArn }}
       function_name: ${{ steps.output.outputs.FunctionName }}
@@ -179,6 +181,7 @@ jobs:
     needs:
       - prepare
       - deploy-lambda
+      - cfn-lint
     uses: mb-dot-dev/reusable-workflows/.github/workflows/deploy-cloudformation.yaml@main
     with:
       stack-name: ${{ needs.prepare.outputs.project_name }}-api-gateway

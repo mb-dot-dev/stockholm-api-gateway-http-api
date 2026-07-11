@@ -41,7 +41,7 @@ coverage:
 
 .PHONY: cfn-lint
 cfn-lint:  ## Run CloudFormation linter.
-	uv run cfn-lint aws/*.yml *-template.yaml
+	uv run cfn-lint aws/*.yml template.yaml
 
 .PHONY: requirements
 requirements:  ## Generate requirements.txt from Pipfile.lock.
