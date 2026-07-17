@@ -5,20 +5,20 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "aws-lambda-powertools>=3.31.0",
+    "aws-lambda-powertools>=3.31.1",
     "pyjwt>=2.0",
 ]
 
 [dependency-groups]
 dev = [
-    "aws-lambda-powertools[aws-sdk]>=3.31.0",
-    "cfn-lint>=1.52.1",
+    "aws-lambda-powertools[aws-sdk]>=3.31.1",
+    "cfn-lint>=1.53.0",
     "moto[sqs]>=5.2.2",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "requests>=2.34.2",
-    "ruff>=0.15.20",
-    "ty>=0.0.56",
+    "ruff>=0.15.22",
+    "ty>=0.0.60",
 ]
 
 ##### TESTING #####
