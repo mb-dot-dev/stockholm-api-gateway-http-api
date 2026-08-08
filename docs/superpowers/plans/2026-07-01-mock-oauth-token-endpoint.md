@@ -224,12 +224,14 @@ def issue_token() -> Response:
     return Response(
         status_code=200,
         content_type="application/json",
-        body=json.dumps({
-            "access_token": token,
-            "token_type": "Bearer",
-            "expires_in": 3600,
-            "scope": "openid",
-        }),
+        body=json.dumps(
+            {
+                "access_token": token,
+                "token_type": "Bearer",
+                "expires_in": 3600,
+                "scope": "openid",
+            }
+        ),
     )
 
 
