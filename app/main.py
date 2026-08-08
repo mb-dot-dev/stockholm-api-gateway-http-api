@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from aws_lambda_powertools import Logger, Metrics
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
-from app.oauth import router as oauth_router
 from app.producer import router as producer_router
 
 if TYPE_CHECKING:
@@ -12,7 +11,6 @@ if TYPE_CHECKING:
 logger = Logger()
 metrics = Metrics(namespace="Stockholm")
 app = APIGatewayHttpResolver()
-app.include_router(oauth_router)
 app.include_router(producer_router)
 
 
