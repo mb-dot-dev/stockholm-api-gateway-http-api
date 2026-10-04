@@ -36,7 +36,8 @@ jobs:
   sonarqube:
     name: SonarQube
     uses: mb-dot-dev/reusable-workflows/.github/workflows/python-test-sonar.yaml@main
-    secrets: inherit
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build-lambda-zip:
     runs-on: ubuntu-latest
