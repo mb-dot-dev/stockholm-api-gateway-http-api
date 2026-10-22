@@ -20,7 +20,7 @@ Tests live in `tests/` (a package — `tests/__init__.py` makes pytest put the r
 
 The Lambda deployment artifact is a single `lambda.zip` shared by **both** Lambda functions (the handler path selects which one runs):
 
-- `make build-lambda-package` — exports `requirements.txt`, pip-installs deps targeting `x86_64-manylinux2014` / Python 3.14 into `build/`, copies `app/` in, and zips it.
+- `make build-lambda-package` — exports `requirements.txt`, pip-installs deps targeting `x86_64-manylinux2014` / Python 3.15 into `build/`, copies `app/` in, and zips it.
 
 When changing dependencies, the zip must be rebuilt for the change to reach Lambda. CI runs this on every push.
 
@@ -57,6 +57,6 @@ Most `aws/*.yml` stacks deploy through the shared reusable workflow `mb-dot-dev/
 
 ## Conventions
 
-- Python 3.14, `ruff` with a broad rule set and 120-char lines (see `[tool.ruff.lint]` in `pyproject.toml`). Type-checked with `ty`.
+- Python 3.15, `ruff` with a broad rule set and 120-char lines (see `[tool.ruff.lint]` in `pyproject.toml`). Type-checked with `ty`.
 - `from __future__ import annotations` + `TYPE_CHECKING` imports for Powertools/typing-only symbols is the established pattern in both handlers.
 - `tests/**` and `scripts/**` have relaxed lint rules (asserts, magic values, prints) configured in `per-file-ignores`.
