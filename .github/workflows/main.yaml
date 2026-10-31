@@ -89,7 +89,6 @@ jobs:
     with:
       project: ${{ needs.prepare.outputs.project_name }}
       lambda-execution-role-arn: ${{ fromJSON(needs.deploy-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }}
-      parameter-overrides: AllowedClientId=/projects/stockholm/allowed-client-id
     secrets:
       DEPLOY_ROLE_ARN: ${{ secrets.DEPLOY_ROLE_ARN }}
 
