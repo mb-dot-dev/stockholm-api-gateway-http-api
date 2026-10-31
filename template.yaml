@@ -12,16 +12,18 @@ Parameters:
   LambdaExecutionRoleArn:
     Type: String
     Description: ARN of the existing IAM role for the producer Lambda execution
+  AllowedClientId:
+    Type: String
+    Description: JWT sub claim value of the single allowed client
+  
+  AllowedIps:
+    Type: AWS::SSM::Parameter::Value<List<String>>
+    Description: Comma-separated list of allowed source IP addresses
+    Default: /allowed-ips/all
   QueueUrl:
     Type: AWS::SSM::Parameter::Value<String>
     Description: URL of the existing SQS queue
     Default: /sqs/oslo/queue-url
-  AllowedIps:
-    Type: String
-    Description: Comma-separated list of allowed IP addresses for the producer Lambda function
-  AllowedClientId:
-    Type: String
-    Description: JWT sub claim value of the single allowed client
 
 Outputs:
   FunctionArn:
