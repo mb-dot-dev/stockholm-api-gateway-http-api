@@ -12,10 +12,11 @@ Parameters:
   LambdaExecutionRoleArn:
     Type: String
     Description: ARN of the existing IAM role for the producer Lambda execution
+  
   AllowedClientId:
     Type: String
-    Description: JWT sub claim value of the single allowed client
-  
+    Description: Name of the SSM String parameter holding the JWT sub claim value of the single allowed client
+    Default: /projects/stockholm/allowed-client-id
   AllowedIps:
     Type: AWS::SSM::Parameter::Value<List<String>>
     Description: Name of the SSM StringList parameter holding the allowed source IP addresses
