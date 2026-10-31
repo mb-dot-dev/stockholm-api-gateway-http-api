@@ -91,7 +91,7 @@ jobs:
       lambda-execution-role-arn: ${{ fromJSON(needs.deploy-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }}
     secrets:
       DEPLOY_ROLE_ARN: ${{ secrets.DEPLOY_ROLE_ARN }}
-      SECRET_PARAMETER_OVERRIDES: AllowedIps=${{ secrets.ALLOWED_IPS }} AllowedClientId=${{ secrets.ALLOWED_CLIENT_ID }}
+      SECRET_PARAMETER_OVERRIDES: AllowedClientId=${{ secrets.ALLOWED_CLIENT_ID }}
 
   deploy-api-gateway:
     name: Deploy API Gateway
