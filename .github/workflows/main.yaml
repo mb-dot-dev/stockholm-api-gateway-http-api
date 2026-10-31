@@ -92,7 +92,6 @@ jobs:
       parameter-overrides: AllowedClientId=/projects/stockholm/allowed-client-id
     secrets:
       DEPLOY_ROLE_ARN: ${{ secrets.DEPLOY_ROLE_ARN }}
-      SECRET_PARAMETER_OVERRIDES: AllowedClientId=${{ secrets.ALLOWED_CLIENT_ID }}
 
   deploy-api-gateway:
     name: Deploy API Gateway
