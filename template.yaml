@@ -18,7 +18,7 @@ Parameters:
   
   AllowedIps:
     Type: AWS::SSM::Parameter::Value<List<String>>
-    Description: Comma-separated list of allowed source IP addresses
+    Description: Name of the SSM StringList parameter holding the allowed source IP addresses
     Default: /allowed-ips/all
   QueueUrl:
     Type: AWS::SSM::Parameter::Value<String>
@@ -50,7 +50,7 @@ Resources:
           POWERTOOLS_SERVICE_NAME: !Ref FunctionName
           POWERTOOLS_LOG_LEVEL: INFO
           QUEUE_URL: !Ref QueueUrl
-          ALLOWED_IPS: !Ref AllowedIps
+          ALLOWED_IPS: !Join [",", !Ref AllowedIps]
           ALLOWED_CLIENT_ID: !Ref AllowedClientId
       Tags:
         Project: !Ref ProjectName

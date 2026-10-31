@@ -89,6 +89,8 @@ jobs:
     with:
       project: ${{ needs.prepare.outputs.project_name }}
       lambda-execution-role-arn: ${{ fromJSON(needs.deploy-iam-role.outputs.stack-outputs-json).LambdaExecutionRoleArn }}
+      # Pin the SSM parameter name so sam doesn't reuse a stale previous value
+      parameter-overrides: AllowedIps=/allowed-ips/all
     secrets:
       DEPLOY_ROLE_ARN: ${{ secrets.DEPLOY_ROLE_ARN }}
       SECRET_PARAMETER_OVERRIDES: AllowedClientId=${{ secrets.ALLOWED_CLIENT_ID }}
